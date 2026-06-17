@@ -337,8 +337,12 @@ fingerprint_device_t* BiometricsFingerprint::openHal(const char* class_name) {
 void BiometricsFingerprint::notify(const fingerprint_msg_t* msg) {
     BiometricsFingerprint* thisPtr =
             static_cast<BiometricsFingerprint*>(BiometricsFingerprint::getInstance());
+    if (thisPtr == nullptr) {
+        ALOGE("Receiving callbacks before the client callback is registered.");
+        return;
+    }
     std::lock_guard<std::mutex> lock(thisPtr->mClientCallbackMutex);
-    if (thisPtr == nullptr || thisPtr->mClientCallback == nullptr) {
+    if (thisPtr->mClientCallback == nullptr) {
         ALOGE("Receiving callbacks before the client callback is registered.");
         return;
     }
