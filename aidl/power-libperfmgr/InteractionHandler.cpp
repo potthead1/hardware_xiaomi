@@ -60,10 +60,13 @@ static const uint32_t kDurationOffsetMs =
         ::android::base::GetUintProperty("vendor.powerhal.interaction.offset", /*default*/ 650U);
 
 static size_t CalcTimespecDiffMs(struct timespec start, struct timespec end) {
-    size_t diff_in_ms = 0;
-    diff_in_ms += (end.tv_sec - start.tv_sec) * MSINSEC;
-    diff_in_ms += (end.tv_nsec - start.tv_nsec) / NSINMS;
-    return diff_in_ms;
+    long diff_sec = end.tv_sec - start.tv_sec;
+    long diff_nsec = end.tv_nsec - start.tv_nsec;
+    if (diff_nsec < 0) {
+        diff_sec--;
+        diff_nsec += 1000000000L;
+    }
+    return (size_t)(diff_sec * MSINSEC + diff_nsec / NSINMS);
 }
 
 static int FbIdleOpen(void) {
